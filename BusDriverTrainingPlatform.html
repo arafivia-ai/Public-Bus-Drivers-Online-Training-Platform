@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>TransitLearn — Bus Driver Training Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800&family=Barlow:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --ink:#0A0C0F; --ink2:#111418; --ink3:#181C22; --ink4:#1E232B; --panel:#242A34;
+  --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.12);
+  --text:#E8EAF0; --text2:#8B919E; --text3:#555D6B;
+  --amber:#F5A623; --amber-dim:rgba(245,166,35,0.15); --amber-glow:rgba(245,166,35,0.08);
+  --teal:#2DD4BF; --teal-dim:rgba(45,212,191,0.12);
+  --red:#F87171; --red-dim:rgba(248,113,113,0.12);
+  --green:#4ADE80; --green-dim:rgba(74,222,128,0.12);
+  --blue:#60A5FA; --blue-dim:rgba(96,165,250,0.12);
+  --font-head:'Barlow Condensed',sans-serif; --font-body:'Barlow',sans-serif; --font-mono:'JetBrains Mono',monospace;
+  --r:6px; --r2:10px;
+}
+body { font-family:var(--font-body); background:var(--ink); color:var(--text); line-height:1.5; overflow-x:hidden; }
+.app { display:flex; height:100vh; overflow:hidden; }
+.sidebar { width:220px; min-width:220px; background:var(--ink2); border-right:1px solid var(--border); display:flex; flex-direction:column; overflow-y:auto; }
+.main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.topbar { height:52px; min-height:52px; background:var(--ink2); border-bottom:1px solid var(--border); display:flex; align-items:center; padding:0 24px; gap:16px; }
+.content { flex:1; overflow-y:auto; padding:28px; }
+.sb-logo { padding:20px 18px 16px; border-bottom:1px solid var(--border); }
+.sb-logo-mark { font-family:var(--font-head); font-size:18px; font-weight:800; color:var(--amber); letter-spacing:0.04em; line-height:1; }
+.sb-logo-mark span { color:var(--text3); }
+.sb-logo-sub { font-size:10px; color:var(--text3); letter-spacing:0.1em; text-transform:uppercase; margin-top:2px; }
+.sb-portal-switch { padding:10px 10px 0; display:flex; flex-direction:column; gap:4px; }
+.portal-btn { width:100%; padding:7px 10px; border-radius:var(--r); border:1px solid var(--border); background:transparent; color:var(--text2); font-family:var(--font-body); font-size:12px; cursor:pointer; display:flex; align-items:center; gap:8px; transition:all .15s; }
+.portal-btn:hover { background:var(--ink3); color:var(--text); }
+.portal-btn.active { background:var(--amber-dim); border-color:var(--amber); color:var(--amber); }
+.sb-nav { padding:16px 10px; flex:1; }
+.sb-section { font-size:9px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--text3); padding:0 8px; margin:16px 0 6px; }
+.nav-item { display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:var(--r); color:var(--text2); font-size:13px; cursor:pointer; transition:all .15s; border:1px solid transparent; margin-bottom:1px; position:relative; }
+.nav-item:hover { background:var(--ink3); color:var(--text); }
+.nav-item.active { background:var(--ink4); color:var(--text); border-color:var(--border2); }
+.nav-item.active::before { content:''; position:absolute; left:10px; width:3px; height:18px; background:var(--amber); border-radius:2px; }
+.nav-icon { font-size:15px; min-width:18px; text-align:center; }
+.sb-user { padding:12px 14px; border-top:1px solid var(--border); margin-top:auto; display:flex; align-items:center; gap:8px; }
+.tb-title { font-family:var(--font-head); font-size:20px; font-weight:700; letter-spacing:0.02em; color:var(--text); flex:1; }
+.tb-badge { font-size:10px; font-family:var(--font-mono); padding:3px 8px; border-radius:3px; border:1px solid var(--amber); background:var(--amber-dim); color:var(--amber); letter-spacing:0.05em; }
+.tb-badge.teal { background:var(--teal-dim); border-color:var(--teal); color:var(--teal); }
+.tb-badge.blue { background:var(--blue-dim); border-color:var(--blue); color:var(--blue); }
+.tb-avatar { width:32px; height:32px; border-radius:50%; background:var(--amber-dim); border:1px solid var(--amber); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600; color:var(--amber); cursor:pointer; flex-shrink:0; }
+.tb-avatar.teal { background:var(--teal-dim); border-color:var(--teal); color:var(--teal); }
+.tb-search { background:var(--ink3); border:1px solid var(--border); border-radius:var(--r); padding:6px 12px; color:var(--text2); font-family:var(--font-body); font-size:13px; width:200px; outline:none; }
+.tb-search:focus { border-color:var(--border2); color:var(--text); }
+.tb-search::placeholder { color:var(--text3); }
+.card { background:var(--ink2); border:1px solid var(--border); border-radius:var(--r2); padding:20px; }
+.card-accent-amber { border-left:3px solid var(--amber) !important; border-radius:0 var(--r2) var(--r2) 0 !important; }
+.card-accent-teal  { border-left:3px solid var(--teal) !important; border-radius:0 var(--r2) var(--r2) 0 !important; }
+.card-accent-red   { border-left:3px solid var(--red) !important; border-radius:0 var(--r2) var(--r2) 0 !important; }
+.card-accent-blue  { border-left:3px solid var(--blue) !important; border-radius:0 var(--r2) var(--r2) 0 !important; }
+.card-accent-green { border-left:3px solid var(--green) !important; border-radius:0 var(--r2) var(--r2) 0 !important; }
+.card-accent-purple{ border-left:3px solid #a78bfa !important; border-radius:0 var(--r2) var(--r2) 0 !important; }
+.stat-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:24px; }
+.stat-tile { background:var(--ink2); border:1px solid var(--border); border-radius:var(--r2); padding:18px 20px; position:relative; overflow:hidden; }
+.stat-tile::after { content:''; position:absolute; top:-20px; right:-20px; width:60px; height:60px; border-radius:50%; opacity:0.06; }
+.stat-tile.amber::after { background:var(--amber); } .stat-tile.teal::after { background:var(--teal); }
+.stat-tile.red::after   { background:var(--red); }   .stat-tile.green::after { background:var(--green); }
+.stat-label { font-size:11px; font-weight:500; letter-spacing:0.08em; text-transform:uppercase; color:var(--text3); margin-bottom:8px; }
+.stat-val { font-family:var(--font-head); font-size:36px; font-weight:800; line-height:1; margin-bottom:4px; }
+.stat-tile.amber .stat-val { color:var(--amber); } .stat-tile.teal .stat-val { color:var(--teal); }
+.stat-tile.red .stat-val   { color:var(--red); }   .stat-tile.green .stat-val { color:var(--green); }
+.stat-delta { font-size:11px; color:var(--text3); }
+.stat-delta .up { color:var(--green); } .stat-delta .down { color:var(--red); }
+.tbl-wrap { overflow-x:auto; }
+table { width:100%; border-collapse:collapse; font-size:13px; }
+thead tr { border-bottom:1px solid var(--border2); }
+th { text-align:left; padding:10px 14px; font-size:10px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--text3); white-space:nowrap; }
+td { padding:11px 14px; border-bottom:1px solid var(--border); color:var(--text2); vertical-align:middle; }
+tr:last-child td { border-bottom:none; }
+tr:hover td { background:rgba(255,255,255,0.02); color:var(--text); }
+.badge { display:inline-flex; align-items:center; gap:4px; font-size:10px; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; padding:3px 8px; border-radius:3px; }
+.badge-amber { background:var(--amber-dim); color:var(--amber); } .badge-teal { background:var(--teal-dim); color:var(--teal); }
+.badge-red   { background:var(--red-dim); color:var(--red); }     .badge-green{ background:var(--green-dim); color:var(--green); }
+.badge-blue  { background:var(--blue-dim); color:var(--blue); }   .badge-gray { background:rgba(255,255,255,0.06); color:var(--text2); }
+.btn { display:inline-flex; align-items:center; gap:6px; padding:8px 16px; border-radius:var(--r); border:1px solid; font-family:var(--font-body); font-size:13px; font-weight:500; cursor:pointer; transition:all .15s; white-space:nowrap; }
+.btn-primary { background:var(--amber); border-color:var(--amber); color:var(--ink); }
+.btn-primary:hover { background:#F0A020; }
+.btn-ghost { background:transparent; border-color:var(--border2); color:var(--text2); }
+.btn-ghost:hover { background:var(--ink3); color:var(--text); }
+.btn-teal { background:var(--teal-dim); border-color:var(--teal); color:var(--teal); }
+.btn-teal:hover { background:rgba(45,212,191,0.2); }
+.btn-sm { padding:5px 10px; font-size:12px; }
+.btn:disabled { opacity:0.4; cursor:not-allowed; }
+.prog-bar { height:4px; background:rgba(255,255,255,0.08); border-radius:2px; overflow:hidden; }
+.prog-fill { height:100%; border-radius:2px; transition:width .6s ease; }
+.prog-amber { background:var(--amber); } .prog-teal { background:var(--teal); }
+.prog-green { background:var(--green); } .prog-red   { background:var(--red); }
+.sec-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+.sec-title { font-family:var(--font-head); font-size:16px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; color:var(--text); }
+.sec-sub { font-size:12px; color:var(--text3); margin-top:2px; }
+.g2  { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.g3  { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; }
+.g2-1{ display:grid; grid-template-columns:2fr 1fr; gap:16px; }
+.mb16{ margin-bottom:16px; } .mb24{ margin-bottom:24px; }
+.flex{ display:flex; } .flex-col{ display:flex; flex-direction:column; }
+.items-center{ align-items:center; } .justify-between{ justify-content:space-between; }
+.gap8{ gap:8px; } .gap12{ gap:12px; } .gap16{ gap:16px; } .w100{ width:100%; }
+.separator{ height:1px; background:var(--border); margin:16px 0; }
+.mono { font-family:var(--font-mono); font-size:11.5px; }
+.text-amber{ color:var(--amber); } .text-teal{ color:var(--teal); } .text-green{ color:var(--green); } .text-red{ color:var(--red); }
+.text-muted{ color:var(--text3); } .text-sm{ font-size:12px; } .fw6{ font-weight:600; }
+.chip { display:inline-flex; align-items:center; padding:3px 8px; background:var(--ink3); border:1px solid var(--border); border-radius:20px; font-size:11px; color:var(--text2); }
+.avatar-sm { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; background:var(--amber-dim); border:1px solid var(--amber); color:var(--amber); flex-shrink:0; }
+.video-player { background:#000; border-radius:var(--r2); aspect-ratio:16/9; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; border:1px solid var(--border); cursor:pointer; user-select:none; }
+.video-overlay { position:absolute; inset:0; background:linear-gradient(135deg,rgba(0,0,0,0.6) 0%,transparent 60%); }
+.video-play-btn { width:56px; height:56px; background:rgba(245,166,35,0.9); border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:20px; position:relative; z-index:2; transition:transform .15s; }
+.video-play-btn:hover { transform:scale(1.08); background:var(--amber); }
+.video-controls { position:absolute; bottom:0; left:0; right:0; padding:12px 16px; background:linear-gradient(to top,rgba(0,0,0,0.8),transparent); z-index:2; }
+.video-info { position:absolute; top:12px; left:14px; z-index:2; }
+.drm-badge { font-size:9px; font-family:var(--font-mono); padding:2px 6px; background:rgba(245,166,35,0.2); border:1px solid var(--amber); color:var(--amber); border-radius:2px; letter-spacing:0.1em; }
+.video-bg { width:100%; height:100%; background:linear-gradient(135deg,#1a1f2a 0%,#0d1117 100%); display:flex; align-items:center; justify-content:center; font-size:48px; opacity:0.3; position:absolute; inset:0; }
+.quiz-question { font-size:15px; font-weight:500; color:var(--text); margin-bottom:18px; line-height:1.5; }
+.quiz-option { display:flex; align-items:center; gap:12px; padding:12px 16px; border-radius:var(--r); border:1px solid var(--border); background:var(--ink3); cursor:pointer; margin-bottom:8px; transition:all .15s; font-size:13px; color:var(--text2); }
+.quiz-option:hover { border-color:var(--border2); color:var(--text); background:var(--ink4); }
+.quiz-option.selected { border-color:var(--amber); color:var(--amber); background:var(--amber-glow); }
+.quiz-option.correct  { border-color:var(--green); color:var(--green); background:var(--green-dim); }
+.quiz-option.wrong    { border-color:var(--red);   color:var(--red);   background:var(--red-dim); }
+.quiz-radio { width:16px; height:16px; border-radius:50%; border:2px solid var(--text3); min-width:16px; display:flex; align-items:center; justify-content:center; font-size:9px; }
+.quiz-option.selected .quiz-radio { border-color:var(--amber); background:var(--amber); color:#000; }
+.quiz-option.correct  .quiz-radio { border-color:var(--green); background:var(--green); color:#000; }
+.quiz-option.wrong    .quiz-radio { border-color:var(--red);   background:var(--red);   color:#000; }
+.skill-row { display:flex; align-items:center; gap:12px; margin-bottom:10px; }
+.skill-name { font-size:12px; color:var(--text2); min-width:175px; }
+.skill-dots { display:flex; gap:4px; }
+.skill-dot { width:24px; height:24px; border-radius:4px; border:1px solid var(--border); background:var(--ink3); cursor:pointer; display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-size:10px; color:var(--text3); transition:all .12s; }
+.skill-dot.filled      { background:var(--amber-dim); border-color:var(--amber); color:var(--amber); }
+.skill-dot.filled.high { background:var(--green-dim); border-color:var(--green); color:var(--green); }
+.skill-dot.filled.low  { background:var(--red-dim);   border-color:var(--red);   color:var(--red); }
+.form-group { margin-bottom:16px; }
+.form-label { font-size:11px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:var(--text3); margin-bottom:6px; display:block; }
+.form-input { width:100%; background:var(--ink3); border:1px solid var(--border); border-radius:var(--r); padding:9px 12px; color:var(--text); font-family:var(--font-body); font-size:13px; outline:none; transition:border-color .15s; }
+.form-input:focus { border-color:var(--amber); }
+.form-input::placeholder { color:var(--text3); }
+select.form-input option { background:var(--ink2); }
+textarea.form-input { resize:vertical; min-height:80px; }
+.tabs { display:flex; gap:2px; border-bottom:1px solid var(--border); margin-bottom:20px; }
+.tab { padding:8px 16px; font-size:13px; font-weight:500; color:var(--text3); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; transition:all .15s; }
+.tab:hover { color:var(--text); }
+.tab.active { color:var(--amber); border-bottom-color:var(--amber); }
+.mini-chart { display:flex; align-items:flex-end; gap:4px; height:56px; }
+.bar { flex:1; border-radius:2px 2px 0 0; min-width:8px; }
+::-webkit-scrollbar { width:4px; height:4px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--ink4); border-radius:4px; }
+@keyframes fadeSlide { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+.fade-in { animation:fadeSlide .25s ease forwards; }
+.hidden { display:none !important; }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-mark">TRANSIT<span>LEARN</span></div>
+      <div class="sb-logo-sub">Driver Training Platform</div>
+    </div>
+    <div class="sb-portal-switch">
+      <button class="portal-btn active" data-portal="admin" onclick="switchPortal('admin')">⚙️ &nbsp;Admin Portal</button>
+      <button class="portal-btn" data-portal="trainer" onclick="switchPortal('trainer')">🎓 &nbsp;Trainer Portal</button>
+      <button class="portal-btn" data-portal="driver" onclick="switchPortal('driver')">🚌 &nbsp;Driver Portal</button>
+    </div>
+    <nav class="sb-nav" id="sb-nav"></nav>
+    <div class="sb-user">
+      <div class="tb-avatar teal" id="sb-avatar">AD</div>
+      <div>
+        <div id="sb-name" style="font-size:12px;font-weight:500;color:var(--text)">Admin User</div>
+        <div id="sb-role" style="font-size:10px;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase">Admin</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="topbar">
+      <div class="tb-title" id="tb-title">Platform Dashboard</div>
+      <span class="tb-badge blue" id="tb-badge">ADMIN PORTAL</span>
+      <input class="tb-search" placeholder="Search…" />
+      <span style="font-size:18px;cursor:pointer">🔔</span>
+      <div class="tb-avatar" id="tb-avatar">AD</div>
+    </header>
+    <main class="content" id="content"></main>
+  </div>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────
+let portal = 'admin';
+let view   = 'dashboard';
+
+// ── Data ───────────────────────────────────────────────────────────
+const NAV = {
+  admin: [
+    { section:'Platform', items:[
+      {id:'dashboard',  icon:'🏠', label:'Dashboard'},
+      {id:'drivers',    icon:'👥', label:'All Drivers',  badge:7},
+      {id:'trainers',   icon:'🎓', label:'Trainers'},
+      {id:'depots',     icon:'🏢', label:'Depots & Routes'},
+    ]},
+    { section:'System', items:[
+      {id:'drm',        icon:'🔑', label:'DRM Keys'},
+      {id:'reports',    icon:'📊', label:'Reports'},
+      {id:'audit',      icon:'🔍', label:'Audit Log'},
+      {id:'settings',   icon:'⚙️',  label:'Settings'},
+    ]},
+  ],
+  trainer: [
+    { section:'Content', items:[
+      {id:'courses',    icon:'📖', label:'Course Builder'},
+      {id:'quizbank',   icon:'✏️',  label:'Quiz Bank'},
+      {id:'media',      icon:'🎬', label:'Media Library'},
+    ]},
+    { section:'Drivers', items:[
+      {id:'mydrivers',  icon:'👥', label:'My Drivers', badge:3},
+      {id:'assign',     icon:'📋', label:'Assignments'},
+      {id:'btw',        icon:'🚗', label:'BTW Log'},
+    ]},
+    { section:'Insights', items:[
+      {id:'analytics',  icon:'📈', label:'Analytics'},
+    ]},
+  ],
+  driver: [
+    { section:'Learning', items:[
+      {id:'mycourses',  icon:'📚', label:'My Courses', badge:2},
+      {id:'progress',   icon:'📊', label:'My Progress'},
+      {id:'quiz',       icon:'✏️',  label:'Quizzes'},
+      {id:'btwlog',     icon:'🚗', label:'BTW Sessions'},
+    ]},
+    { section:'Account', items:[
+      {id:'certs',      icon:'🏆', label:'Certificates'},
+      {id:'schedule',   icon:'📅', label:'Schedule'},
+    ]},
+  ],
+};
+
+const PORTALS = {
+  admin:  {label:'Admin',   badge:'ADMIN PORTAL',   badgeCls:'blue',  avatar:'AD', name:'Admin User',   color:'teal'},
+  trainer:{label:'Trainer', badge:'TRAINER PORTAL', badgeCls:'teal',  avatar:'EM', name:'Elena Marsh',  color:'teal'},
+  driver: {label:'Driver',  badge:'DRIVER PORTAL',  badgeCls:'amber', avatar:'DO', name:'D. Okafor',    color:'amber'},
+};
+
+const TOPBAR_TITLE = {
+  dashboard:'Platform Dashboard', drivers:'Driver Management', drm:'DRM Key Management',
+  reports:'Reports', audit:'Audit Log', settings:'System Settings', trainers:'Trainer Management',
+  depots:'Depots & Routes', courses:'Course Builder', quizbank:'Quiz Bank', media:'Media Library',
+  mydrivers:'My Drivers', assign:'Assignments', btw:'BTW Log', analytics:'Analytics',
+  mycourses:'My Courses', progress:'My Progress', quiz:'Quizzes', btwlog:'BTW Sessions',
+  certs:'Certificates', schedule:'Schedule',
+};
+
+const DRIVERS = [
+  {id:1,name:'Marcus Okafor',  emp:'D-10421',depot:'Central',status:'In-Service', prog:82, lic:'2026-04-15',comp:'OK'},
+  {id:2,name:'Priya Sundaram', emp:'D-10422',depot:'North',  status:'Pre-Service',prog:47, lic:'2025-12-01',comp:'At Risk'},
+  {id:3,name:'James Whitfield',emp:'D-10423',depot:'South',  status:'In-Service', prog:100,lic:'2026-08-22',comp:'OK'},
+  {id:4,name:'Aisha Mensah',   emp:'D-10424',depot:'East',   status:'In-Service', prog:65, lic:'2026-01-30',comp:'Overdue'},
+  {id:5,name:'Chen Wei',       emp:'D-10425',depot:'Central',status:'Pre-Service',prog:29, lic:'2025-11-10',comp:'At Risk'},
+  {id:6,name:'Rosa Gutierrez', emp:'D-10426',depot:'West',   status:'In-Service', prog:91, lic:'2027-03-05',comp:'OK'},
+];
+
+const COURSES = [
+  {id:1,title:'Pre-Service Orientation',       type:'Pre-Service', mods:8, dur:'4h',   status:'Published',enrolled:12},
+  {id:2,title:'Defensive Driving Fundamentals',type:'In-Service',  mods:6, dur:'3h',   status:'Published',enrolled:48},
+  {id:3,title:'Emergency Procedures & Safety', type:'Both',        mods:5, dur:'2.5h', status:'Published',enrolled:60},
+  {id:4,title:'Passenger Accessibility (ADA)', type:'In-Service',  mods:4, dur:'1.5h', status:'Published',enrolled:33},
+  {id:5,title:'Route Navigation & GPS Systems',type:'Pre-Service', mods:7, dur:'2h',   status:'Draft',    enrolled:0},
+  {id:6,title:'Annual Compliance Refresh',     type:'In-Service',  mods:3, dur:'1h',   status:'Published',enrolled:85},
+];
+
+const BTW = [
+  {id:1,driver:'Marcus Okafor',  trainer:'Elena Marsh',date:'2025-04-10',dur:120,route:'Route 14 — Downtown Loop', score:87,status:'Completed'},
+  {id:2,driver:'Priya Sundaram', trainer:'Tom Alvarez', date:'2025-04-11',dur:90, route:'Route 7 — Airport Express',score:72,status:'Pending Sign-off'},
+  {id:3,driver:'Chen Wei',       trainer:'Elena Marsh',date:'2025-04-12',dur:60, route:'Training Yard',             score:68,status:'Completed'},
+  {id:4,driver:'Aisha Mensah',   trainer:'Tom Alvarez', date:'2025-04-13',dur:105,route:'Route 22 — Suburban',      score:81,status:'Draft'},
+];
+
+const AUDIT = [
+  {ts:'2025-04-14 14:22:03',user:'admin@transit.org',       action:'Assignment.Created',  entity:'TrainingAssignment',ip:'10.0.1.5'},
+  {ts:'2025-04-14 13:15:44',user:'trainer@transit.org',     action:'BtwSession.Signed',   entity:'BtwSession',        ip:'10.0.1.12'},
+  {ts:'2025-04-14 11:08:21',user:'d.okafor@transit.org',    action:'Quiz.Submitted',      entity:'QuizAttempt',       ip:'10.0.2.33'},
+  {ts:'2025-04-14 10:55:17',user:'admin@transit.org',       action:'Driver.Created',      entity:'DriverProfile',     ip:'10.0.1.5'},
+  {ts:'2025-04-14 09:41:05',user:'trainer@transit.org',     action:'Course.Published',    entity:'Course',            ip:'10.0.1.12'},
+  {ts:'2025-04-13 17:30:58',user:'d.mensah@transit.org',    action:'VideoProgress.Saved', entity:'WatchSession',      ip:'10.0.2.41'},
+];
+
+const QUIZ_QS = [
+  {q:'When approaching a bus stop with passengers waiting, you should:',
+   opts:['Maintain speed and signal at the last moment','Slow gradually, check mirrors, signal early, and pull smoothly to the kerb','Sound the horn to alert passengers before arriving','Only stop if more than 3 passengers are waiting'],correct:1},
+  {q:'In wet weather conditions, what is the minimum stopping distance compared to dry conditions?',
+   opts:['Same — ABS handles the difference','1.5× longer','At least twice as long','3× longer'],correct:2},
+  {q:'A passenger requests an unscheduled stop between designated bus stops. You should:',
+   opts:['Stop immediately to assist the passenger','Explain politely that stops are at designated locations only','Call dispatch for approval before deciding','Open the door only if traffic allows'],correct:1},
+];
+
+// ── Helpers ────────────────────────────────────────────────────────
+function statusBadge(s) {
+  const map = {
+    'Completed':'badge-green','Published':'badge-teal','Draft':'badge-gray',
+    'In-Service':'badge-blue','Pre-Service':'badge-amber','Both':'badge-blue',
+    'OK':'badge-green','At Risk':'badge-amber','Overdue':'badge-red',
+    'Pending Sign-off':'badge-amber','Active':'badge-green','Revoked':'badge-red','Expired':'badge-red',
+  };
+  return `<span class="badge ${map[s]||'badge-gray'}">${s}</span>`;
+}
+
+function progBar(pct, cls='prog-amber') {
+  return `<div class="prog-bar"><div class="prog-fill ${cls}" style="width:${pct}%"></div></div>`;
+}
+
+function circleSVG(pct, color, size=48) {
+  const r = (size-6)/2;
+  const circ = 2*Math.PI*r;
+  const offset = circ - (pct/100)*circ;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+    <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="4"/>
+    <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="${color}" stroke-width="4"
+      stroke-dasharray="${circ}" stroke-dashoffset="${offset}" stroke-linecap="round"
+      transform="rotate(-90 ${size/2} ${size/2})"/>
+    <text x="${size/2}" y="${size/2}" text-anchor="middle" dominant-baseline="central"
+      fill="${color}" font-size="10" font-weight="700" font-family="'JetBrains Mono',monospace">${pct}%</text>
+  </svg>`;
+}
+
+function miniBarChart(data, color) {
+  const max = Math.max(...data);
+  return `<div class="mini-chart">${data.map((v,i)=>
+    `<div class="bar" style="height:${(v/max)*100}%;background:${i===data.length-1?color:color+'55'}"></div>`
+  ).join('')}</div>`;
+}
+
+// ── Navigation ─────────────────────────────────────────────────────
+function switchPortal(p) {
+  portal = p;
+  view = {admin:'dashboard',trainer:'courses',driver:'mycourses'}[p];
+  document.querySelectorAll('.portal-btn').forEach(b=>b.classList.toggle('active', b.dataset.portal===p));
+  const info = PORTALS[p];
+  document.getElementById('tb-badge').textContent = info.badge;
+  document.getElementById('tb-badge').className = `tb-badge ${info.badgeCls}`;
+  document.getElementById('tb-avatar').textContent = info.avatar;
+  document.getElementById('sb-avatar').textContent = info.avatar;
+  document.getElementById('sb-name').textContent = info.name;
+  document.getElementById('sb-role').textContent = info.label;
+  renderNav();
+  renderPage();
+}
+
+function setView(v) {
+  view = v;
+  renderNav();
+  renderPage();
+}
+
+function renderNav() {
+  const nav = NAV[portal];
+  let html = '';
+  nav.forEach(sec => {
+    html += `<div class="sb-section">${sec.section}</div>`;
+    sec.items.forEach(item => {
+      html += `<div class="nav-item ${view===item.id?'active':''}" onclick="setView('${item.id}')">
+        <span class="nav-icon">${item.icon}</span>
+        <span style="flex:1">${item.label}</span>
+        ${item.badge?`<span class="badge badge-amber" style="font-size:9px;padding:1px 5px">${item.badge}</span>`:''}
+      </div>`;
+    });
+  });
+  document.getElementById('sb-nav').innerHTML = html;
+  document.getElementById('tb-title').textContent = TOPBAR_TITLE[view] || view;
+}
+
+// ── Page renders ───────────────────────────────────────────────────
+function renderPage() {
+  document.getElementById('tb-title').textContent = TOPBAR_TITLE[view] || view;
+  const el = document.getElementById('content');
+  el.innerHTML = '';
+  const div = document.createElement('div');
+  div.className = 'fade-in';
+  div.innerHTML = getPageHTML();
+  el.appendChild(div);
+  attachPageEvents();
+}
+
+function getPageHTML() {
+  if (portal==='admin') {
+    if (view==='dashboard') return adminDashHTML();
+    if (view==='drivers')   return driversHTML();
+    if (view==='drm')       return drmHTML();
+    if (view==='reports')   return reportsHTML();
+    if (view==='audit')     return auditHTML();
+  }
+  if (portal==='trainer') {
+    if (view==='courses')   return coursesHTML();
+    if (view==='btw')       return btwHTML('trainer');
+    if (view==='mydrivers') return driversHTML();
+  }
+  if (portal==='driver') {
+    if (view==='mycourses') return myCoursesHTML();
+    if (view==='quiz')      return quizPageHTML();
+    if (view==='btwlog')    return btwHTML('driver');
+    if (view==='progress')  return driverDashHTML();
+  }
+  return genericHTML(TOPBAR_TITLE[view]||view);
+}
+
+// ── Admin Dashboard ────────────────────────────────────────────────
+function adminDashHTML() {
+  return `
+  <div class="stat-grid">
+    <div class="stat-tile amber"><div class="stat-label">Total Drivers</div><div class="stat-val">284</div><div class="stat-delta"><span class="up">+7</span> this month</div></div>
+    <div class="stat-tile teal"><div class="stat-label">Compliance Rate</div><div class="stat-val">91%</div><div class="stat-delta"><span class="up">↑ 3%</span> vs last quarter</div></div>
+    <div class="stat-tile red"><div class="stat-label">Overdue Training</div><div class="stat-val">23</div><div class="stat-delta"><span class="down">Needs attention</span></div></div>
+    <div class="stat-tile green"><div class="stat-label">BTW Hours (MTD)</div><div class="stat-val">847</div><div class="stat-delta">Across <span class="up">48</span> drivers</div></div>
+  </div>
+  <div class="g2 mb24">
+    <div class="card">
+      <div class="sec-head"><div class="sec-title">Completion by Depot</div></div>
+      ${[['Central',94,72],['North',88,58],['South',79,61],['East',71,49],['West',95,44]].map(([d,p,n])=>`
+      <div style="margin-bottom:12px">
+        <div class="flex justify-between" style="margin-bottom:4px">
+          <span style="font-size:13px;color:var(--text)">${d} Depot</span>
+          <span style="font-size:12px;font-family:var(--font-mono);color:${p>=90?'var(--green)':p>=80?'var(--amber)':'var(--red)'}">${p}% · ${n} drivers</span>
+        </div>
+        ${progBar(p, p>=90?'prog-green':p>=80?'prog-amber':'prog-red')}
+      </div>`).join('')}
+    </div>
+    <div class="card">
+      <div class="sec-head"><div class="sec-title">Monthly Completions</div></div>
+      ${miniBarChart([48,62,71,55,80,94,78,88,103,91,115,108],'var(--amber)')}
+      <div style="font-size:11px;color:var(--text3);margin-top:8px;display:flex;justify-content:space-between"><span>Jan</span><span>Apr</span><span>Jul</span><span>Oct</span><span>Dec</span></div>
+      <div class="separator"></div>
+      <div class="g2">
+        <div><div style="font-family:var(--font-head);font-size:22px;font-weight:800;color:var(--teal)">1,142</div><div style="font-size:11px;color:var(--text3)">YTD completions</div></div>
+        <div><div style="font-family:var(--font-head);font-size:22px;font-weight:800;color:var(--amber)">76%</div><div style="font-size:11px;color:var(--text3)">Pass rate (quizzes)</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="sec-head">
+      <div><div class="sec-title">Drivers Requiring Attention</div><div class="sec-sub">Overdue training or expiring licenses</div></div>
+      <button class="btn btn-ghost btn-sm" onclick="setView('drivers')">View All Drivers</button>
+    </div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Driver</th><th>Depot</th><th>Status</th><th>License Exp.</th><th>Compliance</th><th>Action</th></tr></thead>
+      <tbody>${DRIVERS.filter(d=>d.comp!=='OK').map(d=>`
+        <tr>
+          <td><div class="flex items-center gap8"><div class="avatar-sm">${d.name.split(' ').map(n=>n[0]).join('')}</div><div style="font-weight:500;color:var(--text)">${d.name}</div></div></td>
+          <td>${d.depot}</td>
+          <td>${statusBadge(d.status)}</td>
+          <td class="mono">${d.lic}</td>
+          <td>${statusBadge(d.comp)}</td>
+          <td><button class="btn btn-ghost btn-sm">Notify</button></td>
+        </tr>`).join('')}
+      </tbody>
+    </table></div>
+  </div>`;
+}
+
+// ── Driver Dashboard ───────────────────────────────────────────────
+function driverDashHTML() {
+  return `
+  <div class="stat-grid">
+    <div class="stat-tile amber"><div class="stat-label">Courses Assigned</div><div class="stat-val">4</div><div class="stat-delta"><span class="up">2</span> due this month</div></div>
+    <div class="stat-tile teal"><div class="stat-label">Completion Rate</div><div class="stat-val">67%</div><div class="stat-delta"><span class="up">+12%</span> this quarter</div></div>
+    <div class="stat-tile green"><div class="stat-label">BTW Hours</div><div class="stat-val">14.5</div><div class="stat-delta">Target: <span class="up">20h</span></div></div>
+    <div class="stat-tile red"><div class="stat-label">Overdue</div><div class="stat-val">1</div><div class="stat-delta"><span class="down">Action required</span></div></div>
+  </div>
+  <div class="g2-1">
+    <div class="card">
+      <div class="sec-head"><div><div class="sec-title">Active Courses</div><div class="sec-sub">Your assigned training</div></div></div>
+      ${[
+        {title:'Defensive Driving Fundamentals',prog:68,due:'Apr 25',type:'In-Service'},
+        {title:'Emergency Procedures & Safety',prog:100,due:'Completed',type:'Both'},
+        {title:'Annual Compliance Refresh',prog:15,due:'Apr 30',type:'In-Service',overdue:true},
+        {title:'Passenger Accessibility (ADA)',prog:0,due:'May 15',type:'In-Service'},
+      ].map(c=>`
+        <div style="margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border)">
+          <div class="flex justify-between items-center" style="margin-bottom:6px">
+            <div>
+              <div style="font-size:13px;font-weight:500;color:var(--text)">${c.title}</div>
+              <div class="flex gap8 items-center" style="margin-top:3px">
+                <span class="text-sm text-muted">Due: ${c.due}</span>
+                ${c.overdue?'<span class="badge badge-red">Overdue</span>':''}
+                ${statusBadge(c.type)}
+              </div>
+            </div>
+            ${circleSVG(c.prog, c.prog===100?'var(--green)':c.overdue?'var(--red)':'var(--amber)', 40)}
+          </div>
+          ${progBar(c.prog, c.prog===100?'prog-green':c.overdue?'prog-red':'prog-amber')}
+        </div>`).join('')}
+    </div>
+    <div class="flex-col gap16">
+      <div class="card">
+        <div class="sec-title" style="margin-bottom:12px">Next BTW Session</div>
+        <div style="font-size:13px;color:var(--text);font-weight:500">Thu 17 Apr · 09:00</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:4px">Route 14 — Downtown Loop</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:2px">Trainer: Elena Marsh</div>
+        <div class="separator"></div>
+        <button class="btn btn-teal btn-sm w100">View Details</button>
+      </div>
+      <div class="card">
+        <div class="sec-title" style="margin-bottom:12px">Quiz Pending</div>
+        <div style="font-size:13px;color:var(--amber);font-weight:500">Emergency Procedures</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:4px">15 questions · 25 min limit</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:2px">Attempt 1 of 3 · Passing: 80%</div>
+        <div class="separator"></div>
+        <button class="btn btn-primary btn-sm w100" onclick="setView('quiz')">Start Quiz →</button>
+      </div>
+      <div class="card">
+        <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);margin-bottom:10px">Compliance Status</div>
+        ${[['CDL License','OK'],['Defensive Driving','OK'],['Annual Refresh','Overdue']].map(([l,s])=>`
+        <div class="flex justify-between items-center" style="margin-bottom:8px">
+          <span style="font-size:12px;color:var(--text2)">${l}</span>${statusBadge(s)}
+        </div>`).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── My Courses ─────────────────────────────────────────────────────
+function myCoursesHTML() {
+  const progs = [68,100,45,0,15];
+  return `
+  <div class="sec-head mb16"><div><div class="sec-title">My Courses</div><div class="sec-sub">4 assigned · 1 overdue</div></div></div>
+  <div class="g2">
+    ${COURSES.slice(0,5).map((c,i)=>{
+      const p=progs[i]||0;
+      const col = p===100?'var(--green)':p>0?'var(--amber)':'var(--text3)';
+      const progCls = p===100?'prog-green':'prog-amber';
+      return `<div class="card" style="cursor:pointer" onclick="openCourse(${c.id})"
+        onmouseenter="this.style.borderColor='var(--border2)'" onmouseleave="this.style.borderColor='var(--border)'">
+        <div class="flex justify-between items-center" style="margin-bottom:10px">
+          ${statusBadge(c.type)}
+          ${circleSVG(p,col,40)}
+        </div>
+        <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px;line-height:1.3">${c.title}</div>
+        <div class="flex gap8" style="margin-bottom:12px">
+          <span class="chip">${c.dur}</span><span class="chip">${c.mods} modules</span>
+        </div>
+        ${progBar(p,progCls)}
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+function openCourse(id) {
+  const c = COURSES.find(x=>x.id===id);
+  const p = [68,100,45,0,15][id-1]||0;
+  const col = p===100?'var(--green)':p>0?'var(--amber)':'var(--text3)';
+  document.getElementById('content').innerHTML = `
+  <div class="fade-in">
+    <button class="btn btn-ghost btn-sm" style="margin-bottom:16px" onclick="setView('mycourses')">← Back to Courses</button>
+    <div class="g2-1">
+      <div class="flex-col gap16">
+        <div id="vplayer" class="video-player" onclick="toggleVideo()">
+          <div class="video-bg">🚌</div>
+          <div class="video-overlay"></div>
+          <div class="video-info">
+            <span class="drm-badge">🔒 DRM PROTECTED</span>
+            <div style="margin-top:6px;font-size:13px;font-weight:600;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.8)">${c.title}</div>
+          </div>
+          <div class="video-play-btn" id="play-btn">▶</div>
+          <div class="video-controls">
+            <div class="prog-bar" style="margin-bottom:6px"><div class="prog-fill prog-amber" id="vprog" style="width:${p===100?100:34}%"></div></div>
+            <div style="display:flex;justify-content:space-between;font-size:10px;color:rgba(255,255,255,.7);font-family:var(--font-mono)">
+              <span id="vtime">13:00</span><span style="font-size:9px;opacity:.7">HLS/DASH · Widevine</span><span>38:00</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="sec-title" style="margin-bottom:4px">${c.title}</div>
+          <div class="flex gap8 items-center" style="margin-bottom:12px">${statusBadge(c.type)}<span class="text-sm text-muted">${c.dur} · ${c.mods} modules</span></div>
+          <div class="tabs"><div class="tab active">Modules</div><div class="tab">Overview</div><div class="tab">Resources</div></div>
+          ${[
+            {t:'Introduction & Safety Brief',d:'12 min',done:true,type:'video'},
+            {t:'Wet Weather Driving Techniques',d:'18 min',done:true,type:'video'},
+            {t:'Knowledge Check — Module 2',d:'10 min',done:false,type:'quiz',active:true},
+            {t:'Night Driving & Visibility',d:'15 min',done:false,type:'video'},
+            {t:'Highway Merging & Lane Changes',d:'22 min',done:false,type:'video'},
+            {t:'Final Assessment',d:'30 min',done:false,type:'quiz'},
+          ].map((m,i)=>`
+          <div class="flex items-center gap12" style="padding:10px 0;border-bottom:1px solid var(--border);opacity:${m.done||m.active?1:.5}">
+            <div style="width:28px;height:28px;border-radius:50%;background:${m.done?'var(--green-dim)':m.active?'var(--amber-dim)':'var(--ink3)'};border:1px solid ${m.done?'var(--green)':m.active?'var(--amber)':'var(--border)'};display:flex;align-items:center;justify-content:center;font-size:12px;color:${m.done?'var(--green)':m.active?'var(--amber)':'var(--text3)'}">
+              ${m.done?'✓':m.active?'▶':(i+1)}
+            </div>
+            <div style="flex:1">
+              <div style="font-size:13px;color:${m.active?'var(--amber)':'var(--text)'};font-weight:${m.active?500:400}">${m.t}</div>
+              <div style="font-size:11px;color:var(--text3)">${m.type==='quiz'?'Quiz':'Video'} · ${m.d}</div>
+            </div>
+            ${m.active?'<button class="btn btn-primary btn-sm">Continue</button>':''}
+          </div>`).join('')}
+        </div>
+      </div>
+      <div class="flex-col gap16">
+        <div class="card">
+          <div class="sec-title" style="margin-bottom:12px">Your Progress</div>
+          <div style="text-align:center;margin-bottom:12px">${circleSVG(p,col,72)}</div>
+          ${progBar(p,'prog-amber')}
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:4px"><span>2 of 6 complete</span><span>~2.5h remaining</span></div>
+        </div>
+        <div class="card card-accent-amber">
+          <div style="font-size:12px;font-weight:600;color:var(--amber);margin-bottom:6px">DRM PROTECTION</div>
+          <div style="font-size:12px;color:var(--text3);line-height:1.6">This content is protected. Streaming is device-locked. Downloading or screen recording is not permitted.</div>
+        </div>
+        <div class="card">
+          <div style="font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:10px">Course Details</div>
+          ${[['Format','HLS/DASH Stream'],['DRM','Widevine + PlayReady'],['Session Expiry','30 min'],['Max Attempts','3 per quiz']].map(([k,v])=>`
+          <div class="flex justify-between" style="font-size:12px;margin-bottom:6px">
+            <span class="text-muted">${k}</span><span style="color:var(--text);font-family:var(--font-mono);font-size:11px">${v}</span>
+          </div>`).join('')}
+        </div>
+      </div>
+    </div>
+  </div>`;
+  initVideo();
+}
+
+// ── Video player logic ─────────────────────────────────────────────
+let videoInterval = null, videoPct = 34, videoPlaying = false;
+function initVideo() { videoPct=34; videoPlaying=false; updateVideoUI(); }
+function toggleVideo() {
+  videoPlaying = !videoPlaying;
+  if (videoPlaying) {
+    videoInterval = setInterval(()=>{
+      videoPct = Math.min(100, videoPct+1);
+      updateVideoUI();
+      if (videoPct>=100){ clearInterval(videoInterval); videoPlaying=false; updateVideoUI(); }
+    }, 300);
+  } else { clearInterval(videoInterval); }
+  updateVideoUI();
+}
+function updateVideoUI() {
+  const prog = document.getElementById('vprog');
+  const btn  = document.getElementById('play-btn');
+  const time = document.getElementById('vtime');
+  if (prog) prog.style.width = videoPct+'%';
+  if (btn)  btn.textContent = videoPlaying?'⏸':'▶';
+  if (time) time.textContent = Math.floor((videoPct/100)*38)+':00';
+}
+
+// ── Quiz ───────────────────────────────────────────────────────────
+let quizState = {qi:0, sel:null, revealed:false, score:0, done:false};
+
+function quizPageHTML() {
+  return `
+  <div class="sec-head mb16"><div class="sec-title">Active Quiz</div></div>
+  <div class="g2-1">
+    <div class="card" id="quiz-box">${renderQuizBox()}</div>
+    <div class="flex-col gap16">
+      <div class="card card-accent-amber">
+        <div style="font-size:11px;font-weight:600;color:var(--amber);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">Emergency Procedures</div>
+        <div style="font-size:12px;color:var(--text3);line-height:1.6">Attempt 1 of 3 · 25 min limit · Passing: 80%</div>
+      </div>
+      <div class="card">
+        <div class="sec-title" style="margin-bottom:10px">Instructions</div>
+        <ul style="padding-left:16px;font-size:12px;color:var(--text3);line-height:2.1">
+          <li>Read each question carefully</li>
+          <li>Answers are validated server-side</li>
+          <li>Tab switching is monitored</li>
+          <li>Submit before the timer expires</li>
+        </ul>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderQuizBox() {
+  const s = quizState;
+  if (s.done) {
+    const pct = Math.round((s.score/QUIZ_QS.length)*100);
+    const col = pct>=80?'var(--green)':pct>=60?'var(--amber)':'var(--red)';
+    return `<div style="text-align:center;padding:24px 0">
+      <div style="font-size:48px;margin-bottom:12px">${s.score===3?'🏆':s.score>=2?'✅':'📝'}</div>
+      <div style="font-family:var(--font-head);font-size:28px;font-weight:800;color:${col}">${s.score}/${QUIZ_QS.length} CORRECT</div>
+      <div style="color:var(--text3);font-size:13px;margin-top:6px;margin-bottom:20px">${s.score===3?'Excellent work — full marks':'Review flagged questions before your next attempt'}</div>
+      ${progBar(pct, pct>=80?'prog-green':pct>=60?'prog-amber':'prog-red')}
+      <div style="font-size:11px;color:var(--text3);margin:8px 0 20px">Passing threshold: 80%</div>
+      <button class="btn btn-primary" onclick="resetQuiz()">Retake Quiz</button>
+    </div>`;
+  }
+  const q = QUIZ_QS[s.qi];
+  const pBarPct = Math.round(((s.qi+1)/QUIZ_QS.length)*100);
+  return `
+  <div class="flex justify-between items-center" style="margin-bottom:16px">
+    <div class="flex gap8 items-center">
+      <span class="mono text-muted">Q${s.qi+1}/${QUIZ_QS.length}</span>
+      <div class="prog-bar" style="width:120px"><div class="prog-fill prog-amber" style="width:${pBarPct}%"></div></div>
+    </div>
+    <span class="badge badge-amber">⏱ 2:34 left</span>
+  </div>
+  <p class="quiz-question">${q.q}</p>
+  ${q.opts.map((opt,i)=>{
+    let cls = 'quiz-option';
+    let inner = '';
+    if (s.revealed) {
+      if (i===q.correct)       { cls += ' correct'; inner='✓'; }
+      else if (i===s.sel)      { cls += ' wrong';   inner='✗'; }
+    } else if (i===s.sel)      { cls += ' selected'; }
+    return `<div class="${cls}" onclick="${s.revealed?'':'quizSelect('+i+')'}">
+      <div class="quiz-radio">${inner}</div>
+      <span>${opt}</span>
+    </div>`;
+  }).join('')}
+  <div style="margin-top:16px;display:flex;gap:10px;align-items:center">
+    ${!s.revealed
+      ? `<button class="btn btn-primary" ${s.sel===null?'disabled':''} onclick="quizSubmit()">Submit Answer</button>`
+      : `<button class="btn btn-primary" onclick="quizNext()">${s.qi===QUIZ_QS.length-1?'View Results':'Next Question →'}</button>
+         <div style="font-size:12px;color:${s.sel===q.correct?'var(--green)':'var(--red)'}">${s.sel===q.correct?'✓ Correct!':'✗ Incorrect — correct answer highlighted'}</div>`}
+  </div>`;
+}
+
+function quizSelect(i) { quizState.sel=i; document.getElementById('quiz-box').innerHTML=renderQuizBox(); }
+function quizSubmit() {
+  if (quizState.sel===null) return;
+  quizState.revealed=true;
+  if (quizState.sel===QUIZ_QS[quizState.qi].correct) quizState.score++;
+  document.getElementById('quiz-box').innerHTML=renderQuizBox();
+}
+function quizNext() {
+  if (quizState.qi===QUIZ_QS.length-1) { quizState.done=true; }
+  else { quizState.qi++; quizState.sel=null; quizState.revealed=false; }
+  document.getElementById('quiz-box').innerHTML=renderQuizBox();
+}
+function resetQuiz() { quizState={qi:0,sel:null,revealed:false,score:0,done:false}; document.getElementById('quiz-box').innerHTML=renderQuizBox(); }
+
+// ── Courses ────────────────────────────────────────────────────────
+function coursesHTML() {
+  return `
+  <div class="sec-head mb16">
+    <div><div class="sec-title">Course Builder</div><div class="sec-sub">${COURSES.length} courses</div></div>
+    <button class="btn btn-primary btn-sm">+ New Course</button>
+  </div>
+  <div class="g3">${COURSES.map(c=>`
+    <div class="card card-accent-${c.status==='Published'?'teal':'amber'}" style="cursor:pointer">
+      <div class="flex justify-between items-center" style="margin-bottom:8px">${statusBadge(c.status)}<span class="text-sm text-muted">${c.enrolled} enrolled</span></div>
+      <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:6px;line-height:1.3">${c.title}</div>
+      <div class="flex gap8" style="margin-bottom:12px">${statusBadge(c.type)}<span class="chip">${c.dur}</span><span class="chip">${c.mods} modules</span></div>
+      <div class="separator"></div>
+      <div class="flex gap8">
+        <button class="btn btn-ghost btn-sm">Edit</button>
+        ${c.status==='Draft'?'<button class="btn btn-teal btn-sm">Publish</button>':''}
+        <button class="btn btn-ghost btn-sm" style="margin-left:auto">Analytics</button>
+      </div>
+    </div>`).join('')}
+  </div>`;
+}
+
+// ── Drivers ────────────────────────────────────────────────────────
+function driversHTML() {
+  return `
+  <div class="sec-head mb16">
+    <div><div class="sec-title">Driver Management</div><div class="sec-sub">${DRIVERS.length} registered drivers</div></div>
+    <div class="flex gap8">
+      <button class="btn btn-ghost btn-sm">↑ Import CSV</button>
+      <button class="btn btn-primary btn-sm">+ Add Driver</button>
+    </div>
+  </div>
+  <div class="flex gap8 mb16">
+    <input class="tb-search" style="width:220px" placeholder="Search drivers…" oninput="filterDrivers(this.value)" id="driver-search"/>
+    <button class="btn btn-sm btn-primary" onclick="filterDriverStatus('All')" id="f-all">All</button>
+    <button class="btn btn-sm btn-ghost" onclick="filterDriverStatus('Pre-Service')" id="f-pre">Pre-Service</button>
+    <button class="btn btn-sm btn-ghost" onclick="filterDriverStatus('In-Service')" id="f-in">In-Service</button>
+  </div>
+  <div class="card"><div class="tbl-wrap"><table id="drivers-table">
+    <thead><tr><th>Driver</th><th>Employee #</th><th>Depot</th><th>Status</th><th>Progress</th><th>License Exp.</th><th>Compliance</th><th></th></tr></thead>
+    <tbody>${renderDriverRows(DRIVERS)}</tbody>
+  </table></div></div>`;
+}
+
+function renderDriverRows(list) {
+  return list.map(d=>`<tr>
+    <td><div class="flex items-center gap8"><div class="avatar-sm">${d.name.split(' ').map(n=>n[0]).join('')}</div><div style="font-weight:500;color:var(--text)">${d.name}</div></div></td>
+    <td class="mono">${d.emp}</td><td>${d.depot}</td><td>${statusBadge(d.status)}</td>
+    <td style="min-width:130px">
+      <div class="flex items-center gap8">
+        ${progBar(d.prog, d.prog===100?'prog-green':d.prog>50?'prog-amber':'prog-red')}
+        <span class="mono" style="font-size:11px;min-width:28px">${d.prog}%</span>
+      </div>
+    </td>
+    <td class="mono">${d.lic}</td><td>${statusBadge(d.comp)}</td>
+    <td><button class="btn btn-ghost btn-sm">View</button></td>
+  </tr>`).join('');
+}
+
+let driverFilter='All', driverSearch='';
+function filterDrivers(q) { driverSearch=q; applyDriverFilter(); }
+function filterDriverStatus(s) {
+  driverFilter=s;
+  ['All','Pre-Service','In-Service'].forEach(x=>{
+    const b=document.getElementById('f-'+{All:'all','Pre-Service':'pre','In-Service':'in'}[x]);
+    if(b) b.className=`btn btn-sm ${x===s?'btn-primary':'btn-ghost'}`;
+  });
+  applyDriverFilter();
+}
+function applyDriverFilter() {
+  const t=document.querySelector('#drivers-table tbody');
+  if(!t) return;
+  const filtered = DRIVERS.filter(d=>
+    (driverFilter==='All'||d.status===driverFilter) &&
+    d.name.toLowerCase().includes(driverSearch.toLowerCase())
+  );
+  t.innerHTML=renderDriverRows(filtered);
+}
+
+// ── BTW ────────────────────────────────────────────────────────────
+let btwScores = {}, btwNotes = '';
+
+function btwHTML(p) {
+  return `
+  <div class="sec-head mb16">
+    <div><div class="sec-title">BTW Sessions</div><div class="sec-sub">${BTW.length} recent sessions</div></div>
+    ${p==='trainer'?'<button class="btn btn-primary btn-sm">+ Log New Session</button>':''}
+  </div>
+  <div class="card"><div class="tbl-wrap"><table>
+    <thead><tr><th>Driver</th><th>Trainer</th><th>Date</th><th>Duration</th><th>Route</th><th>Score</th><th>Status</th><th></th></tr></thead>
+    <tbody>${BTW.map(s=>`<tr>
+      <td style="font-weight:500;color:var(--text)">${s.driver}</td>
+      <td>${s.trainer}</td>
+      <td class="mono" style="font-size:12px">${s.date}</td>
+      <td>${s.dur} min</td>
+      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.route}</td>
+      <td><span style="font-family:var(--font-mono);font-size:13px;font-weight:600;color:${s.score>=80?'var(--green)':s.score>=70?'var(--amber)':'var(--red)'}">${s.score}</span></td>
+      <td>${statusBadge(s.status)}</td>
+      <td><button class="btn btn-ghost btn-sm" onclick="${p==='trainer'?`openBtw(${s.id})`:'void(0)'}">
+        ${p==='trainer'&&s.status==='Draft'?'Complete':'View'}
+      </button></td>
+    </tr>`).join('')}
+    </tbody>
+  </table></div></div>`;
+}
+
+function openBtw(id) {
+  const s = BTW.find(x=>x.id===id);
+  const skills=['Vehicle Control & Handling','Mirror Usage & Observation','Passenger Interaction',
+    'Route Knowledge','Safety Procedures','Emergency Response','Kerb Management','Speed & Positioning'];
+  skills.forEach(sk=>btwScores[sk]=3);
+  btwNotes='';
+  document.getElementById('content').innerHTML = `
+  <div class="fade-in">
+    <button class="btn btn-ghost btn-sm" style="margin-bottom:16px" onclick="setView('btw')">← Back to Sessions</button>
+    <div class="g2-1">
+      <div class="card" id="btw-form">
+        <div class="sec-title" style="margin-bottom:16px">BTW Session Evaluation</div>
+        ${renderBtwForm(s, skills)}
+      </div>
+      <div class="flex-col gap16">
+        <div class="card card-accent-blue">
+          <div style="font-size:11px;font-weight:600;color:var(--blue);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">Session Info</div>
+          ${[['Date',s.date],['Duration',s.dur+' min'],['Route',s.route],['Status',s.status]].map(([k,v])=>`
+          <div class="flex justify-between" style="font-size:12px;margin-bottom:6px">
+            <span class="text-muted">${k}</span><span style="color:var(--text)">${v}</span>
+          </div>`).join('')}
+        </div>
+        <div class="card">
+          <div style="font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:8px">Scoring Guide</div>
+          ${[[1,'Unsatisfactory'],[2,'Below Standard'],[3,'Meets Standard'],[4,'Above Standard'],[5,'Excellent']].map(([n,l])=>`
+          <div class="flex gap8 items-center" style="margin-bottom:5px;font-size:12px">
+            <div class="skill-dot" style="width:20px;height:20px;font-size:10px">${n}</div>
+            <span class="text-muted">${l}</span>
+          </div>`).join('')}
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderBtwForm(s, skills) {
+  const avg = Math.round(Object.values(btwScores).reduce((a,b)=>a+b,0)/skills.length*20);
+  const col = avg>=80?'var(--green)':avg>=60?'var(--amber)':'var(--red)';
+  return `
+  <div class="flex justify-between items-center" style="margin-bottom:16px">
+    <div>
+      <div style="font-weight:600;color:var(--text)">${s.driver}</div>
+      <div style="font-size:12px;color:var(--text3)">${s.route} · ${s.date}</div>
+    </div>
+    <div style="text-align:center">${circleSVG(avg,col,56)}<div style="font-size:10px;color:var(--text3);margin-top:4px">Overall</div></div>
+  </div>
+  <div class="separator"></div>
+  ${skills.map(sk=>`
+  <div class="skill-row">
+    <span class="skill-name">${sk}</span>
+    <div class="skill-dots">${[1,2,3,4,5].map(v=>`
+      <div class="skill-dot ${btwScores[sk]>=v?'filled':''} ${btwScores[sk]>=v&&v>=4?'high':''} ${btwScores[sk]>=v&&v<=2?'low':''}"
+        onclick="setBtwScore('${sk}',${v})">${v}</div>`).join('')}
+    </div>
+  </div>`).join('')}
+  <div class="separator"></div>
+  <div class="form-group">
+    <label class="form-label">Trainer Notes</label>
+    <textarea class="form-input" id="btw-notes" placeholder="Observations, incidents, areas to improve…" rows="3" oninput="btwNotes=this.value">${btwNotes}</textarea>
+  </div>
+  <div class="flex gap8">
+    <button class="btn btn-primary" onclick="submitBtw()">Submit & Request Signature</button>
+    <button class="btn btn-ghost">Save Draft</button>
+  </div>`;
+}
+
+function setBtwScore(skill, val) {
+  const s = BTW.find(x=>x.id===1)||BTW[0];
+  const skills=['Vehicle Control & Handling','Mirror Usage & Observation','Passenger Interaction',
+    'Route Knowledge','Safety Procedures','Emergency Response','Kerb Management','Speed & Positioning'];
+  btwScores[skill]=val;
+  document.getElementById('btw-form').innerHTML = `<div class="sec-title" style="margin-bottom:16px">BTW Session Evaluation</div>${renderBtwForm(s,skills)}`;
+  document.getElementById('btw-notes').value=btwNotes;
+}
+
+function submitBtw() {
+  document.getElementById('btw-form').innerHTML = `
+  <div class="sec-title" style="margin-bottom:16px">BTW Session Evaluation</div>
+  <div style="text-align:center;padding:24px 0">
+    <div style="font-size:40px;margin-bottom:12px">✅</div>
+    <div style="font-family:var(--font-head);font-size:22px;font-weight:800;color:var(--green)">Session Submitted</div>
+    <div style="color:var(--text3);font-size:13px;margin-top:6px">Awaiting driver digital signature</div>
+    <div class="separator"></div>
+    <button class="btn btn-ghost btn-sm" onclick="setView('btw')">Back to Sessions</button>
+  </div>`;
+}
+
+// ── DRM Keys ───────────────────────────────────────────────────────
+function drmHTML() {
+  return `
+  <div class="sec-head mb16">
+    <div><div class="sec-title">DRM Key Management</div><div class="sec-sub">AES-128 · Widevine · PlayReady · FairPlay</div></div>
+    <button class="btn btn-primary btn-sm">Rotate Keys</button>
+  </div>
+  <div class="stat-grid" style="grid-template-columns:repeat(4,1fr)">
+    <div class="stat-tile teal"><div class="stat-label">🔑 Active Keys</div><div class="stat-val">48</div></div>
+    <div class="stat-tile amber"><div class="stat-label">🔄 Next Rotation</div><div class="stat-val">12d</div></div>
+    <div class="stat-tile green"><div class="stat-label">📡 Requests (24h)</div><div class="stat-val">2,847</div></div>
+    <div class="stat-tile red"><div class="stat-label">🚫 Revoked Keys</div><div class="stat-val">3</div></div>
+  </div>
+  <div class="card">
+    <div class="sec-title" style="margin-bottom:16px">Content Key Policies</div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Key ID</th><th>Course</th><th>DRM System</th><th>Created</th><th>Status</th><th>Licenses</th></tr></thead>
+      <tbody>
+        ${[
+          {kid:'7f3a-bc12',course:'Defensive Driving Fundamentals',drm:'Widevine + PlayReady',created:'2025-01-15',st:'Active',n:284},
+          {kid:'9e2b-4d88',course:'Emergency Procedures & Safety',drm:'Widevine + FairPlay',created:'2025-01-15',st:'Active',n:312},
+          {kid:'1c7f-a35e',course:'Pre-Service Orientation',drm:'PlayReady',created:'2025-02-01',st:'Active',n:88},
+          {kid:'0d4a-e91c',course:'[Archived Course v1]',drm:'Widevine',created:'2024-08-10',st:'Revoked',n:0},
+        ].map(k=>`<tr>
+          <td class="mono" style="font-size:12px">${k.kid}</td>
+          <td style="font-size:13px;color:var(--text)">${k.course}</td>
+          <td><span class="chip">${k.drm}</span></td>
+          <td class="mono" style="font-size:11px">${k.created}</td>
+          <td>${statusBadge(k.st==='Active'?'Active':'Revoked')}</td>
+          <td class="mono" style="font-size:12px">${k.n.toLocaleString()}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table></div>
+  </div>`;
+}
+
+// ── Reports ────────────────────────────────────────────────────────
+function reportsHTML() {
+  return `
+  <div class="sec-head mb16">
+    <div><div class="sec-title">Reports</div><div class="sec-sub">Analytics & compliance exports</div></div>
+    <button class="btn btn-ghost btn-sm">Schedule Report</button>
+  </div>
+  <div class="g3">${[
+    {title:'Completion Report',     desc:'Course completions by depot, date range, and training type',icon:'📋',acc:'teal'},
+    {title:'Compliance Summary',    desc:'License expiry, overdue training, at-risk driver list',icon:'⚠️',acc:'amber'},
+    {title:'BTW Hours Log',         desc:'Behind-the-wheel time by driver, trainer, and route',icon:'🚗',acc:'blue'},
+    {title:'Quiz Performance',      desc:'Pass rates, average scores, and problem question analysis',icon:'📝',acc:'purple'},
+    {title:'Driver Progress',       desc:'Individual training timelines and completion status',icon:'📈',acc:'green'},
+    {title:'Audit Export',          desc:'Full audit trail export for compliance and legal review',icon:'🔍',acc:'red'},
+  ].map(r=>`
+    <div class="card card-accent-${r.acc}" style="cursor:pointer">
+      <div style="font-size:24px;margin-bottom:8px">${r.icon}</div>
+      <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px">${r.title}</div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:14px;line-height:1.5">${r.desc}</div>
+      <div class="flex gap8">
+        <button class="btn btn-ghost btn-sm">PDF</button>
+        <button class="btn btn-ghost btn-sm">CSV</button>
+      </div>
+    </div>`).join('')}
+  </div>`;
+}
+
+// ── Audit Log ──────────────────────────────────────────────────────
+function auditHTML() {
+  const actionBadge = a => {
+    const cls = a.includes('Created')?'badge-teal':a.includes('Signed')?'badge-green':a.includes('Submitted')?'badge-blue':'badge-gray';
+    return `<span class="badge ${cls}">${a}</span>`;
+  };
+  return `
+  <div class="sec-head mb16">
+    <div><div class="sec-title">Audit Log</div><div class="sec-sub">Tamper-evident · Append-only · Hash-chained</div></div>
+    <div class="flex gap8">
+      <select class="form-input btn-sm" style="width:auto">
+        <option>All Actions</option><option>Assignment.*</option><option>Driver.*</option><option>Quiz.*</option>
+      </select>
+      <button class="btn btn-ghost btn-sm">Export CSV</button>
+    </div>
+  </div>
+  <div class="card card-accent-amber" style="margin-bottom:16px">
+    <div class="flex items-center gap12">
+      <span style="font-size:18px">🔒</span>
+      <div>
+        <div style="font-size:13px;font-weight:600;color:var(--amber)">Hash Chain Integrity: Verified</div>
+        <div style="font-size:12px;color:var(--text3)">Last verification: 2025-04-14 14:30 UTC · 6,482 entries validated</div>
+      </div>
+    </div>
+  </div>
+  <div class="card"><div class="tbl-wrap"><table>
+    <thead><tr><th>Timestamp (UTC)</th><th>User</th><th>Action</th><th>Entity</th><th>IP Address</th></tr></thead>
+    <tbody>${AUDIT.map(e=>`<tr>
+      <td class="mono" style="font-size:11.5px;color:var(--text3)">${e.ts}</td>
+      <td style="font-size:12px;color:var(--text)">${e.user}</td>
+      <td>${actionBadge(e.action)}</td>
+      <td class="mono" style="font-size:11px;color:var(--text3)">${e.entity}</td>
+      <td class="mono" style="font-size:11px;color:var(--text3)">${e.ip}</td>
+    </tr>`).join('')}
+    </tbody>
+  </table></div></div>`;
+}
+
+// ── Generic placeholder ────────────────────────────────────────────
+function genericHTML(label) {
+  return `
+  <div class="sec-head mb24"><div class="sec-title">${label}</div></div>
+  <div class="card" style="padding:40px;text-align:center">
+    <div style="font-size:40px;margin-bottom:12px;opacity:.4">🚧</div>
+    <div style="font-family:var(--font-head);font-size:20px;font-weight:700;color:var(--text);margin-bottom:6px">${label}</div>
+    <div style="font-size:13px;color:var(--text3)">Select another section from the sidebar to explore the platform.</div>
+  </div>`;
+}
+
+// ── Post-render hooks ──────────────────────────────────────────────
+function attachPageEvents() { /* reserved for future delegation */ }
+
+// ── Boot ───────────────────────────────────────────────────────────
+renderNav();
+renderPage();
+</script>
+</body>
+</html>
